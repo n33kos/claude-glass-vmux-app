@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="glass-app://sdk/glass-app.css">
+<style>
+  iframe { display: block; width: 100%; height: 100%; border: 0; background: transparent; }
+  .msg { height: 100%; display: grid; place-items: center; text-align: center; color: var(--ink-faint); padding: 24px; }
+  .msg code { color: var(--ink-dim); }
+  /* Small refresh button, top-left so it doesn't cover vmux's own settings gear. */
+  .tool { position: fixed; top: 8px; z-index: 10; width: 26px; height: 26px; border-radius: 7px;
+    display: grid; place-items: center; font-size: 15px; color: var(--ink-dim); background: rgba(20, 23, 34, 0.55);
+    border: 1px solid var(--line); opacity: .35; transition: opacity .15s; cursor: pointer; }
+  #refresh { left: 8px; }
+  #transcript { left: 40px; font-size: 13px; }
+  #transcript.on { color: var(--sky); border-color: rgba(127, 200, 255, 0.5); }
+  body:hover .tool { opacity: .85; }
+  .tool:hover { opacity: 1; color: var(--ink); }
+</style>
+</head>
+<body>
+  <button id="refresh" class="tool" title="Reload Voice Multiplexer" aria-label="Reload">↻</button>
+  <button id="transcript" class="tool" title="Show transcript" aria-label="Toggle transcript">≡</button>
+  <div id="root" class="msg">Connecting to Voice Multiplexer…</div>
+  <script src="glass-app://sdk/glass-app.js"></script>
+  <script>
+    // The relay names sessions sha256(project dir)[:12]; the glass knows the project dir.
+    async function relayId(dir) {
+      const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(dir.replace(/\/+$/, '')));
+      return [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 12);
+    }
+
+    let shown = '';
+    let last = null;
+    // Reload: forget what's shown and render again (fresh page, health re-checked).
+    document.getElementById('refresh').onclick = () => { shown = ''; if (last) render(last); };
+    // Transcript on/off: a view command, so the choice is saved with the window.
+    const tbtn = document.getElementById('transcript');
+    tbtn.onclick = () => { if (last) glass.run('transcript', { show: !last.state.transcript }); };
+    async function render(props) {
+      last = props;
+      const { state, session } = props;
+      tbtn.classList.toggle('on', !!state.transcript);
+      tbtn.title = state.transcript ? 'Hide transcript' : 'Show transcript';
+      const id = await relayId(session.cwd);
+      const src = `${state.relay}/?session=${id}${state.transcript ? '' : '&transcript=0'}`;
+      if (src === shown) return;
+      shown = src;
+      try {
+        await fetch(`${state.relay}/api/health`, { mode: 'no-cors' });
+      } catch {
+        shown = '';
+        root.className = 'msg';
+        root.innerHTML = `<div>Voice Multiplexer isn't running at <code>${state.relay}</code>.<br>Start it, then reopen this window.</div>`;
+        return;
+      }
+      root.className = '';
+      root.innerHTML = '';
+      const frame = document.createElement('iframe');
+      frame.allow = 'microphone; autoplay';
+      frame.src = src;
+      root.appendChild(frame);
+    }
+    glass.onState((p) => { render(p); });
+  </script>
+</body>
+</html>

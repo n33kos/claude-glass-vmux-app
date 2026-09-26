@@ -1,0 +1,16 @@
+{
+  "apiVersion": 1,
+  "type": "vmux",
+  "title": "vmux",
+  "icon": "≋",
+  "singleton": true,
+  "description": "This session's Voice Multiplexer channel: the user talks to you here and hears your replies. Nothing for you to drive.",
+  "commands": {
+    "transcript": { "usage": "transcript --show true|false", "help": "Show or hide the transcript", "view": true }
+  },
+  "permissions": {
+    "network": ["http://127.0.0.1:3100", "ws://127.0.0.1:3100"],
+    "microphone": true,
+    "storage": true
+  }
+}
