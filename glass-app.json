@@ -6,10 +6,11 @@
   "singleton": true,
   "description": "This session's Voice Multiplexer channel: the user talks to you here and hears your replies. Nothing for you to drive.",
   "commands": {
-    "transcript": { "usage": "transcript --show true|false", "help": "Show or hide the transcript", "view": true }
+    "transcript": { "usage": "transcript --show true|false", "help": "Show or hide the transcript", "view": true },
+    "session": { "usage": "session [--id <relay session id>]", "help": "Only if the relay names this session differently: set its id (no --id = automatic from the project folder). Never set a URL; the relay address is fixed." }
   },
   "permissions": {
-    "network": ["http://127.0.0.1:3100", "ws://127.0.0.1:3100"],
+    "network": ["http://localhost:3100", "ws://localhost:3100"],
     "microphone": true,
     "storage": true
   }

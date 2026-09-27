@@ -24,6 +24,9 @@
   <div id="root" class="msg">Connecting to Voice Multiplexer…</div>
   <script src="glass-app://sdk/glass-app.js"></script>
   <script>
+    // Always localhost (never 127.0.0.1): it must match the manifest's permissions and the origin
+    // the pairing was made on. Not state, so nothing can point it elsewhere.
+    const RELAY = 'http://localhost:3100';
     // The relay names sessions sha256(project dir)[:12]; the glass knows the project dir.
     async function relayId(dir) {
       const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(dir.replace(/\/+$/, '')));
@@ -42,16 +45,16 @@
       const { state, session } = props;
       tbtn.classList.toggle('on', !!state.transcript);
       tbtn.title = state.transcript ? 'Hide transcript' : 'Show transcript';
-      const id = await relayId(session.cwd);
-      const src = `${state.relay}/?session=${id}${state.transcript ? '' : '&transcript=0'}`;
+      const id = state.session || await relayId(session.cwd);
+      const src = `${RELAY}/?session=${encodeURIComponent(id)}${state.transcript ? '' : '&transcript=0'}`;
       if (src === shown) return;
       shown = src;
       try {
-        await fetch(`${state.relay}/api/health`, { mode: 'no-cors' });
+        await fetch(`${RELAY}/api/health`, { mode: 'no-cors' });
       } catch {
         shown = '';
         root.className = 'msg';
-        root.innerHTML = `<div>Voice Multiplexer isn't running at <code>${state.relay}</code>.<br>Start it, then reopen this window.</div>`;
+        root.innerHTML = `<div>Voice Multiplexer isn't running at <code>${RELAY}</code>.<br>Start it, then reopen this window.</div>`;
         return;
       }
       root.className = '';
