@@ -1,8 +1,9 @@
 # vmux for Claude Glass
 
-A Claude Glass custom app that shows this Claude session's
-Voice Multiplexer channel inside the glass: voice controls, and
-optionally the transcript.
+A [Claude Glass](https://github.com/n33kos/claude-glass) app that puts this Claude session's
+[Voice Multiplexer](https://github.com/n33kos/claude-voice-multiplexer) channel inside the glass:
+voice controls, and optionally the transcript. Pin it to a sidebar and talk to Claude while you
+watch it work.
 
 - Embeds the relay's web client (`http://localhost:3100/?session=<id>`), locked to the session
   whose id is `sha256(project dir)[:12]` (the relay's session id; the glass knows the project dir).
@@ -16,6 +17,16 @@ optionally the transcript.
 
 ## Install
 
-    ln -s ~/claude-glass-vmux-app ~/.claude/claude-glass/apps/vmux
+Needs [Claude Glass](https://github.com/n33kos/claude-glass) and a running
+[Voice Multiplexer](https://github.com/n33kos/claude-voice-multiplexer).
 
-then restart the glass (`claude-glass close && claude-glass open`).
+```sh
+git clone https://github.com/n33kos/claude-glass-vmux-app ~/.claude/claude-glass/apps/vmux
+```
+
+(or clone it anywhere and symlink the folder to `~/.claude/claude-glass/apps/vmux`), then restart
+the glass: `claude-glass close && claude-glass open`.
+
+## License
+
+MIT
